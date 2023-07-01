@@ -1,52 +1,80 @@
-import { Calendar, User } from 'lucide-react'
+import Prismic from '@prismicio/client'
+import { format } from 'date-fns'
+import { ptBR } from 'date-fns/locale'
 
-export default function Home() {
+import { Calendar, User } from 'lucide-react'
+import { getPrismicClient } from '../service/prismic'
+import { GetStaticProps } from 'next'
+
+type Post = {
+  slug: string
+  title: string
+  subtitle: string
+  updatedAt: string
+  author: string
+}
+
+interface PostsProps {
+  posts: Post[]
+}
+
+export default function Home({ posts }: PostsProps) {
   return (
     <div className="mx-auto h-screen max-w-[720px]">
-      <div className="my-auto mt-5 justify-start">
-        <h1 className="text-3xl font-bold text-white-100">
-          Como utilizar Hooks
-        </h1>
-        <p className="text-1xl mb-3 text-white-200">
-          Pensando em sincronização em vez de ciclos de vida.
-        </p>
-        <div className="top-20 flex gap-1">
-          <Calendar className="h-4 w-4" />
-          <span className="text-[14px] text-white-300">15 Mar 2021</span>
-          <User className="ml-4 h-4 w-4" />
-          <span className="text-[14px] text-white-300">Joseph Oliveira</span>
-        </div>
-      </div>
+      <div>
+        {posts.map((post) => (
+          <div key={post.slug} className="my-auto mt-5 justify-start">
+            <h1 className="text-3xl font-bold text-white-100">{post.title}</h1>
 
-      <div className="my-auto mt-5 justify-start">
-        <h1 className="text-3xl font-bold text-white-100">
-          Como utilizar Hooks
-        </h1>
-        <p className="text-1xl mb-3 text-white-200">
-          Pensando em sincronização em vez de ciclos de vida.
-        </p>
-        <div className="top-20 flex gap-1">
-          <Calendar className="h-4 w-4" />
-          <span className="text-[14px] text-white-300">15 Mar 2021</span>
-          <User className="ml-4 h-4 w-4" />
-          <span className="text-[14px] text-white-300">Joseph Oliveira</span>
-        </div>
-      </div>
-
-      <div className="my-auto mt-5 justify-start">
-        <h1 className="text-3xl font-bold text-white-100">
-          Como utilizar Hooks
-        </h1>
-        <p className="text-1xl mb-3 text-white-200">
-          Pensando em sincronização em vez de ciclos de vida.
-        </p>
-        <div className="top-20 flex gap-1">
-          <Calendar className="h-4 w-4" />
-          <span className="text-[14px] text-white-300">15 Mar 2021</span>
-          <User className="ml-4 h-4 w-4" />
-          <span className="text-[14px] text-white-300">Joseph Oliveira</span>
-        </div>
+            <p className="text-1xl mb-3 text-white-200">{post.subtitle}</p>
+            <div className="top-20 flex gap-1">
+              <Calendar className="h-4 w-4" />
+              <span className="text-[14px] text-white-300">
+                {post.updatedAt}
+              </span>
+              <User className="ml-4 h-4 w-4" />
+              <span className="text-[14px] text-white-300">{post.author}</span>
+            </div>
+          </div>
+        ))}
       </div>
     </div>
   )
+}
+
+export const getStaticProps: GetStaticProps = async () => {
+  const prismic = getPrismicClient()
+
+  const response = await prismic.query(
+    [Prismic.Predicates.at('document.type', 'publications')],
+    {
+      pageSize: 100,
+    },
+  )
+
+  console.log(JSON.stringify(response, null, 2))
+
+  const posts = response.results.map((post) => {
+    const updatedAt = format(
+      new Date(post.last_publication_date),
+      'dd MMMM yyyy',
+      {
+        locale: ptBR,
+      },
+    )
+
+    return {
+      slug: post.uid,
+      title: post.data.title,
+      subtitle: post.data.subtitle,
+      author: post.data.author,
+      updatedAt,
+    }
+  })
+
+  return {
+    props: {
+      posts,
+    },
+  }
 }
