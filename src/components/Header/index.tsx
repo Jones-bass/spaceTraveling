@@ -1,4 +1,4 @@
-import imgLogo from '../../public/logo.svg'
+import imgLogo from '../../../public/logo.svg'
 
 import Image from 'next/image'
 

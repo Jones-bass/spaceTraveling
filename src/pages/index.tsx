@@ -5,6 +5,7 @@ import { ptBR } from 'date-fns/locale'
 import { Calendar, User } from 'lucide-react'
 import { getPrismicClient } from '../service/prismic'
 import { GetStaticProps } from 'next'
+import Link from 'next/link'
 
 type Post = {
   slug: string
@@ -23,19 +24,25 @@ export default function Home({ posts }: PostsProps) {
     <div className="mx-auto h-screen max-w-[720px]">
       <div>
         {posts.map((post) => (
-          <div key={post.slug} className="my-auto mt-5 justify-start">
-            <h1 className="text-3xl font-bold text-white-100">{post.title}</h1>
+          <Link key={post.slug} href={`/posts/${post.slug}`}>
+            <div key={post.slug} className="my-auto mt-5 justify-start">
+              <h1 className="text-3xl font-bold text-white-100">
+                {post.title}
+              </h1>
 
-            <p className="text-1xl mb-3 text-white-200">{post.subtitle}</p>
-            <div className="top-20 flex gap-1">
-              <Calendar className="h-4 w-4" />
-              <span className="text-[14px] text-white-300">
-                {post.updatedAt}
-              </span>
-              <User className="ml-4 h-4 w-4" />
-              <span className="text-[14px] text-white-300">{post.author}</span>
+              <p className="text-1xl mb-3 text-white-200">{post.subtitle}</p>
+              <div className="top-20 flex gap-1">
+                <Calendar className="h-4 w-4" />
+                <span className="text-[14px] text-white-300">
+                  {post.updatedAt}
+                </span>
+                <User className="ml-4 h-4 w-4" />
+                <span className="text-[14px] text-white-300">
+                  {post.author}
+                </span>
+              </div>
             </div>
-          </div>
+          </Link>
         ))}
       </div>
     </div>
